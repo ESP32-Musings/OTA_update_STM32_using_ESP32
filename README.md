@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/laukik-hase/OTA_update_STM32_using_ESP32">
-    <img src="images/logo.png" alt="Logo" width="133" height="125">
+    <img src="images/logo.png" alt="Logo" width="160" height="160">
   </a>
 
   <h3 align="center">OTA for STM32Fxx MCU using ESP32</h3>
@@ -31,6 +31,7 @@
 ## Table of Contents
 
 - [About the Project](#about-the-project)
+  - [Code](#code)
 - [Getting Started](#getting-started)
   - [Hardware Required](#hardware-required)
   - [Prerequisites](#prerequisites)
@@ -38,7 +39,7 @@
   - [Disclaimer](#disclaimer)
 - [Usage (For STM32 Blue Pill)](#usage-for-stm32-blue-pill)
 - [Troubleshooting](#troubleshooting)
-- [Contributers](#contributers)
+- [Contributors](#contributors)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 
@@ -50,11 +51,11 @@ Testing was done with ESP32-DevKitC v4 board and STM32F103C8T6 ([Blue Pill](http
 
 ### Code
 
-`/esp_stm_flash` -> Basic flashing utility, requires path of the .bin file, already uploaded in SPIFFS
+`/esp_stm_flash` -> Basic flashing utility, requires path of the .bin file which has been already uploaded in SPIFFS
 
 `/file_serving_stm` -> OTA demo, with HTTP File Server with embedded flash link
 
-`references` -> Python scripts for understanding the flashing protocol commands and verification
+`/references` -> Python scripts for understanding the flashing protocol commands and verification
 
 ## Getting Started
 
@@ -90,7 +91,7 @@ To run the OTA demo, you need an ESP32 dev board (e.g. ESP32-WROVER Kit) or ESP3
 
 ### Disclaimer
 
-We have assumed that the STM32 is already in boot mode before flashing the code (**Step 1 & 5** in [Usage (For STM32 Blue Pill)](#usage-for-stm32-blue-pill)). You can use a MOSFET as a switch to automate the process, using an ESP32 GPIO as an input.
+We have assumed that the STM32 is already in boot mode before flashing the code (**Step 1 & 5** in [Usage](#usage-for-stm32-blue-pill) section). You can use a MOSFET as a switch to automate the process, using an ESP32 GPIO as an input.
 
 ## Usage (For STM32 Blue Pill)
 
@@ -130,18 +131,18 @@ We have assumed that the STM32 is already in boot mode before flashing the code 
       <img width="800" height="450" src="images/stm_demo.gif">
   </p>
 
-5. Revert the BOOT0 pin to its initial position and press the RESET Button on the STM32.
+5. **Revert** the BOOT0 pin to its initial position and press the RESET Button on the STM32.
 6. Voila! your STM32 is now running the code you uploaded Over-the-Air!
 
 ## Troubleshooting
 
 * Check your wiring. Make sure that the ESP32 and STM32 are powered separately. Don't power one MCU using the other.
 * Verify your WiFi SSID and password. It is a known bug that ESP32 does not connect to WiFi stations with 'space' character in the SSID or password.
-* Check if your STM32 is locked using this official [tool]((https://www.st.com/en/development-tools/flasher-stm32.html)) by STMicroelectronics and unlock it by erasing the memory of your chip.
+* Check if your STM32 is locked using this [official tool](https://www.st.com/en/development-tools/flasher-stm32.html) by STMicroelectronics and unlock it by erasing the memory of your chip.
 * Check your STM32 code, which generated the .bin file, for any 'logical' errors.
 * For any other bugs or errors, you can always raise [issues](https://github.com/laukik-hase/OTA_update_STM32_using_ESP32/issues).
 
-## Contributers
+## Contributors
 
 * [**laukik-hase**](https://github.com/laukik-hase)
 
@@ -159,6 +160,7 @@ We have assumed that the STM32 is already in boot mode before flashing the code 
 
 * [ESP-IDF Examples - HTTP File Server](https://github.com/espressif/esp-idf/tree/master/examples/protocols/http_server/file_serving)
 
+* [README Template](https://github.com/roshanlam/ReadMeTemplate) by [roshanlam](https://github.com/roshanlam)
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
