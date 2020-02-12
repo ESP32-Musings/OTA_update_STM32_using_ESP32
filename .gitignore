@@ -1,0 +1,13 @@
+/esp_stm_flash/build/*
+/file_serving_stm/build/*
+
+
+/esp_stm_flash/sdkconfig
+/file_serving_stm/sdkconfig
+
+
+/esp_stm_flash/sdkconfig.defaults
+/file_serving_stm/sdkconfig.defaults
+
+/esp_stm_flash/sdkconfig.old
+/file_serving_stm/sdkconfig.old
