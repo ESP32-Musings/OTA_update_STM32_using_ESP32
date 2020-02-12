@@ -49,6 +49,14 @@ The project aims at enabling firmware update of STM32Fxx series MCUs Over-the-Ai
 
 Testing was done with ESP32-DevKitC v4 board and STM32F103C8T6 ([Blue Pill](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)) and [STM32F072C8T6](https://www.st.com/en/microcontrollers-microprocessors/stm32f072c8.html). You can try with any other STM32Fxx MCUs and let me know how it worked out.
 
+### Code
+
+`/esp_stm_flash` -> Basic flashing utility, requires path of the .bin file, already uploaded in SPIFFS
+
+`/file_serving_stm` -> OTA demo, with HTTP File Server with embedded flash link
+
+`references` -> Python scripts for understanding the flashing protocol commands and verification
+
 ## Getting Started
 
 ### Hardware Required
