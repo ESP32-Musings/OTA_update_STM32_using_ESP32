@@ -30,7 +30,6 @@
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [About the Project](#about-the-project)
 - [Getting Started](#getting-started)
   - [Hardware Required](#hardware-required)
@@ -47,7 +46,7 @@
 
 The project aims at enabling firmware update of STM32Fxx series MCUs Over-the-Air using ESP32.
 
-Testing was done with ESP32-DevKitC v4 board and STM32F103C8T6 ([Blue Pill](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)) and [STM32F072C8T6](https://www.st.com/en/microcontrollers-microprocessors/stm32f072c8.html). You can try with any other STM32Fxx MCUs and let me know how it worked out.
+Testing was done with ESP32-DevKitC v4 board and STM32F103C8T6 ([Blue Pill](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)) and [STM32F072C8T6](https://www.st.com/en/microcontrollers-microprocessors/stm32f072c8.html). You can try with any other STM32Fxx MCUs and let us know how it worked out.
 
 ### Code
 
@@ -91,7 +90,7 @@ To run the OTA demo, you need an ESP32 dev board (e.g. ESP32-WROVER Kit) or ESP3
 
 ### Disclaimer
 
-We have assumed that the STM32 is already in boot mode before flashing the code (**Step 1 & 5** in [Usage (For STM32 Blue Pill)](#usage-for-stm32-blue-pill)). You can use a latch or a MOSFET as a switch to automate the process, using an ESP32 GPIO as an input.
+We have assumed that the STM32 is already in boot mode before flashing the code (**Step 1 & 5** in [Usage (For STM32 Blue Pill)](#usage-for-stm32-blue-pill)). You can use a MOSFET as a switch to automate the process, using an ESP32 GPIO as an input.
 
 ## Usage (For STM32 Blue Pill)
 
