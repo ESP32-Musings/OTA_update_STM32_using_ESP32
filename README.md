@@ -30,6 +30,7 @@
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [About the Project](#about-the-project)
   - [Code](#code)
 - [Getting Started](#getting-started)
@@ -40,7 +41,7 @@
 - [Usage (For STM32 Blue Pill)](#usage-for-stm32-blue-pill)
 - [Troubleshooting](#troubleshooting)
 - [Contributors](#contributors)
-- [Acknowledgements](#acknowledgements)
+- [Acknowledgements and Resources](#acknowledgements-and-resources)
 - [License](#license)
 
 ## About the Project
@@ -93,6 +94,8 @@ To run the OTA demo, you need an ESP32 dev board (e.g. ESP32-WROVER Kit) or ESP3
 
 We have assumed that the STM32 is already in boot mode before flashing the code (**Step 1 & 5** in [Usage](#usage-for-stm32-blue-pill) section). You can use a MOSFET as a switch to automate the process, using an ESP32 GPIO as an input.
 
+The program code uses only the path of the binary file to be flashed as a parameter. Thus, it can be easily integrated into any other projects as the file can be sent to ESP32 over any protocol (MQTT, HTTP Client, WebSockets).
+
 ## Usage (For STM32 Blue Pill)
 
 1. Make sure the BOOT0 jumper pin on the board is set to 1 (programming mode) while uploading the code. Once the code is flashed this pin can be changed back to initial position (operating mode). This procedure with your STM32Fxx MCU varies according with your MCU version. 
@@ -111,7 +114,7 @@ We have assumed that the STM32 is already in boot mode before flashing the code 
     <kbd><img width="800" height="450" src="images/ex_config.png" border="5"></kbd>
   </p>
 
-3. In order to test the OTA demo -> `/file_serving_avr` :
+3. In order to test the OTA demo -> `/file_serving_stm` :
     1. Compile and burn the firmware `idf.py -p PORT -b BAUD flash`
     2. Run `idf.py -p PORT monitor` and note down the IP assigned to your ESP module. The default port is 80.
     3. Test the example interactively on a web browser (assuming IP is 192.168.43.82):
@@ -137,7 +140,7 @@ We have assumed that the STM32 is already in boot mode before flashing the code 
 ## Troubleshooting
 
 * Check your wiring. Make sure that the ESP32 and STM32 are powered separately. Don't power one MCU using the other.
-* Verify your WiFi SSID and password. It is a known bug that ESP32 does not connect to WiFi stations with 'space' character in the SSID or password.
+* Verify your WiFi SSID and password.
 * Check if your STM32 is locked using this [official tool](https://www.st.com/en/development-tools/flasher-stm32.html) by STMicroelectronics and unlock it by erasing the memory of your chip.
 * Check your STM32 code, which generated the .bin file, for any 'logical' errors.
 * For any other bugs or errors, you can always raise [issues](https://github.com/laukik-hase/OTA_update_STM32_using_ESP32/issues).
@@ -150,7 +153,7 @@ We have assumed that the STM32 is already in boot mode before flashing the code 
 
 **For OTA updates for AVR MCUs, you can follow this [project](https://github.com/laukik-hase/OTA_update_AVR_using_ESP32/).**
 
-## Acknowledgements
+## Acknowledgements and Resources
 
 * STM32 USART Protocol: [Documentation](https://www.st.com/content/ccc/resource/technical/document/application_note/51/5f/03/1e/bd/9b/45/be/CD00264342.pdf/files/CD00264342.pdf/jcr:content/translations/en.CD00264342.pdf)
 
@@ -161,6 +164,9 @@ We have assumed that the STM32 is already in boot mode before flashing the code 
 * [ESP-IDF Examples - HTTP File Server](https://github.com/espressif/esp-idf/tree/master/examples/protocols/http_server/file_serving)
 
 * [README Template](https://github.com/roshanlam/ReadMeTemplate) by [roshanlam](https://github.com/roshanlam)
+
+* [HackerNews Article: Updating STM32 Over-The-Air using ESP32](https://news.ycombinator.com/item?id=23302664)
+  
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.

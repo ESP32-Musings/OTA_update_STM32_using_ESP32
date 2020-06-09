@@ -2,68 +2,22 @@
 
 static const char *TAG_STM_FLASH = "stm_flash";
 
-esp_err_t fileToBuffer(char *filepath, uint8_t buff[], int *block_count)
+esp_err_t writeTask(FILE *flash_file)
 {
-    logD(TAG_STM_FLASH, "Reading File: %s", filepath);
-
-    FILE *f = fopen(filepath, "rb");
-
-    if (f == NULL)
-    {
-        logE(TAG_STM_FLASH, "%s", "Failed to open file for reading");
-        return ESP_FAIL;
-    }
-    else
-    {
-        logI(TAG_STM_FLASH, "%s", "Found File");
-    }
-
-    fseek(f, 0, SEEK_END);
-    int file_len = ftell(f);
-    rewind(f);
-
-    fread(buff, file_len, 1, f);
-
-    while (file_len % 256 != 0)
-    {
-        buff[file_len] = 0xff;
-        file_len++;
-    }
-
-    *block_count = file_len / 256;
-
-    logD(TAG_STM_FLASH, "Final file size %d", file_len);
-
-    fclose(f);
-
-    return ESP_OK;
-}
-
-esp_err_t writeTask(uint8_t buff[], int block_count)
-{
-    int buff_start = 0, buff_index = 0, curr_block = 0;
+    logI(TAG_STM_FLASH, "%s", "Write Task");
 
     char loadAddress[4] = {0x08, 0x00, 0x00, 0x00};
-    char block[256];
+    char block[256] = {0};
+    int curr_block = 0, bytes_read = 0;
 
+    fseek(flash_file, 0, SEEK_SET);
     setupSTM();
 
-    while (block_count != 0)
+    while ((bytes_read = fread(block, 1, 256, flash_file)) > 0)
     {
-        memset(block, '\0', 256);
-        int block_index = 0;
         curr_block++;
-
-        logD(TAG_STM_FLASH, "Writing Block %d", block_count);
-
-        while (buff_index < buff_start + 256)
-        {
-            block[block_index] = buff[buff_index];
-            block_index++;
-            buff_index++;
-        }
-
-        //ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
+        logI(TAG_STM_FLASH, "Writing block: %d", curr_block);
+        // ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
 
         esp_err_t ret = flashPage(loadAddress, block);
         if (ret == ESP_FAIL)
@@ -71,68 +25,78 @@ esp_err_t writeTask(uint8_t buff[], int block_count)
             return ESP_FAIL;
         }
 
-        buff_start += 256;
-        block_count--;
-
         incrementLoadAddress(loadAddress);
         printf("\n");
+
+        memset(block, 0xff, 256);
     }
 
     return ESP_OK;
 }
 
-esp_err_t readTask(uint8_t buff[], int block_count)
+esp_err_t readTask(FILE *flash_file)
 {
+    logI(TAG_STM_FLASH, "%s", "Read & Verification Task");
     char readAddress[4] = {0x08, 0x00, 0x00, 0x00};
-    char bytes[] = {0x11, 0xEE};
-    char param[] = {0xFF, 0x00};
-    int resp = 1, offset = 0;
 
-    while (block_count != 0)
+    char block[257] = {0};
+    int curr_block = 0, bytes_read = 0;
+
+    fseek(flash_file, 0, SEEK_SET);
+
+    while ((bytes_read = fread(block, 1, 256, flash_file)) > 0)
     {
-        logI(TAG_STM_FLASH, "%s", "Reading Memory");
-        logD(TAG_STM_FLASH, "Reading Block %d", block_count);
+        curr_block++;
+        logI(TAG_STM_FLASH, "Reading block: %d", curr_block);
+        // ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
 
-        if (sendBytes(bytes, sizeof(bytes), resp))
+        esp_err_t ret = readPage(readAddress, block);
+        if (ret == ESP_FAIL)
         {
-            if (loadAddress(readAddress[0], readAddress[1], readAddress[2], readAddress[3]))
-            {
-                sendData(TAG_STM_FLASH, param, sizeof(param));
-                int length = waitForSerialData(257, SERIAL_TIMEOUT);
-                if (length > 0)
-                {
-                    uint8_t data[length];
-                    const int rxBytes = uart_read_bytes(UART_NUM_1, data, length, 1000 / portTICK_RATE_MS);
-
-                    if (rxBytes > 0 && data[0] == 0x79)
-                    {
-                        logI(TAG_STM_FLASH, "%s", "Success");
-                        if (!compare(buff, data, offset))
-                        {
-                            return ESP_FAIL;
-                        }
-                        offset += 256;
-
-                        //ESP_LOG_BUFFER_HEXDUMP("READ MEMORY", data, rxBytes, ESP_LOG_DEBUG);
-                    }
-                    else
-                    {
-                        logI(TAG_STM_FLASH, "%s", "Failure");
-                        return ESP_FAIL;
-                    }
-                }
-                else
-                {
-                    logI(TAG_STM_FLASH, "%s", "Serial Timeout");
-                    return ESP_FAIL;
-                }
-            }
+            return ESP_FAIL;
         }
-        block_count--;
-        incrementLoadAddress(readAddress);
 
+        incrementLoadAddress(readAddress);
         printf("\n");
+
+        memset(block, 0xff, 256);
     }
 
     return ESP_OK;
+}
+
+esp_err_t flashSTM(const char *file_name)
+{
+    esp_err_t err = ESP_FAIL;
+
+    char file_path[FILE_PATH_MAX];
+    sprintf(file_path, "%s%s", BASE_PATH, file_name);
+    logD(TAG_STM_FLASH, "File name: %s", file_path);
+
+    initGPIO();
+    FILE *flash_file = fopen(file_path, "rb");
+    if (flash_file != NULL)
+    {
+        // This while loop executes only once and breaks if any of the functions do not return ESP_OK
+        do
+        {
+            logI(TAG_STM_FLASH, "%s", "Writing STM32 Memory");
+            IS_ESP_OK(writeTask(flash_file));
+
+            logI(TAG_STM_FLASH, "%s", "Reading STM32 Memory");
+            IS_ESP_OK(readTask(flash_file));
+
+            err = ESP_OK;
+        } while (0);
+
+        logI(TAG_STM_FLASH, "%s", "STM32 Flashed Successfully!!!");
+    }
+
+    logI(TAG_STM_FLASH, "%s", "Ending Connection");
+    endConn();
+
+    logI(TAG_STM_FLASH, "%s", "Closing file");
+    fclose(flash_file);
+
+    return err;
 }

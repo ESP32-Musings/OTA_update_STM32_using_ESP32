@@ -1,8 +1,5 @@
 #include "stm_flash.h"
 
-/* Max length a file path can have on storage */
-#define FILE_PATH_MAX (ESP_VFS_PATH_MAX + CONFIG_SPIFFS_OBJ_NAME_LEN)
-
 /* Max size of an individual file. Make sure this
  * value is same as that set in upload_script.html */
 #define MAX_FILE_SIZE (200 * 1024) // 200 KB
@@ -12,35 +9,6 @@
 #define SCRATCH_BUFSIZE 8192
 
 static const char *TAG = "FILE_SERVER_HTTP";
-uint8_t write_buff[PAGE_SIZE_MAX];
-int page_count = 0;
-
-void flashSTM(void *parameter)
-{
-    char *temp = (char *)parameter;
-    char filepath[FILE_PATH_MAX] = "\0";
-    strcat(filepath, temp);
-
-    initGPIO();
-
-    logD(TAG, "File name: %s", filepath);
-    
-    logI(TAG, "%s", "Putting File to Buffer");
-    ESP_ERROR_CHECK(fileToBuffer(filepath, write_buff, &page_count));
-
-    logI(TAG, "%s", "Writing STM32 Memory");
-    ESP_ERROR_CHECK(writeTask(write_buff, page_count));
-    
-    logI(TAG, "%s", "Reading STM32 Memory");
-    ESP_ERROR_CHECK(readTask(write_buff, page_count));
-
-    endConn();
-
-    logD(TAG, "%s", "Flash Successful, Deleting Task");
-    vTaskDelete(NULL);
-
-    
-}
 
 struct file_server_data
 {
@@ -470,9 +438,11 @@ static esp_err_t flash_post_handler(httpd_req_t *req)
         return ESP_FAIL;
     }
 
-    logD(TAG, "Flashing file : %s", filepath);
-
-    xTaskCreate(&flashSTM, "Flash File", 32768, (void *)filepath, 1, NULL);
+    filename++;
+    if (flashSTM(filename) != ESP_OK)
+    {
+        logE(TAG, "%s", "Target flashing failed");
+    }
 
     httpd_resp_set_status(req, "303 See Other");
     httpd_resp_set_hdr(req, "Location", "/");

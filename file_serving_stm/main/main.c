@@ -19,5 +19,5 @@ void app_main(void)
     /* Start the file server */
     ESP_ERROR_CHECK(start_file_server("/spiffs"));
     
-    initUART();
+    initFlashUART();
 }

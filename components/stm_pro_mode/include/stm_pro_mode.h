@@ -31,10 +31,14 @@
 #include "nvs_flash.h"
 #include "logger.h"
 
+//Macro for error checking
+#define IS_ESP_OK(x) if ((x) != ESP_OK) break;
+
 #define TXD_PIN (GPIO_NUM_4) //(GPIO_NUM_1)
 #define RXD_PIN (GPIO_NUM_5) //(GPIO_NUM_3)
-#define RTS_PIN (UART_PIN_NO_CHANGE)
-#define CTS_PIN (UART_PIN_NO_CHANGE)
+#define UART_BAUD_RATE 115200
+#define UART_BUF_SIZE 1024
+#define UART_CONTROLLER UART_NUM_1
 
 #define RESET_PIN (GPIO_NUM_19) //(GPIO_NUM_12)
 #define BOOT0_PIN (GPIO_NUM_21) //(GPIO_NUM_2)
@@ -44,12 +48,11 @@
 #define ACK 0x79
 #define SERIAL_TIMEOUT 5000
 
-#define PAGE_SIZE_MAX 24 * 1024
-
-static const int RX_BUF_SIZE = 1024;
+#define FILE_PATH_MAX 128
+#define BASE_PATH "/spiffs/"
 
 //Initialize UART functionalities
-void initUART(void);
+void initFlashUART(void);
 
 //Initialize GPIO functionalities
 void initGPIO(void);
@@ -65,9 +68,6 @@ void incrementLoadAddress(char *loadAddr);
 
 //End the connection with STM32Fxx
 void endConn(void);
-
-//Compare the STM32Fxx's memory after flashing, with the buffer of binary data for verification purposes
-int compare(uint8_t buff[], uint8_t data[], int offset);
 
 //Get in sync with STM32Fxx
 int cmdSync(void);
@@ -93,8 +93,11 @@ void setupSTM(void);
 //Write data to flash memory address
 int cmdWrite(void);
 
+//Read data from flash memory address
+int cmdRead(void);
+
 //UART send data to STM32Fxx & wait for response
-int sendBytes(char *bytes, int count, int resp);
+int sendBytes(const char *bytes, int count, int resp);
 
 //UART send data byte-by-byte to STM32Fxx
 int sendData(const char *logName, const char *data, const int count);
@@ -103,9 +106,12 @@ int sendData(const char *logName, const char *data, const int count);
 int waitForSerialData(int dataCount, int timeout);
 
 //Send the STM32Fxx the memory address, to be written
-int loadAddress(char adrMS, char adrMI, char adrLI, char adrLS);
+int loadAddress(const char adrMS, const char adrMI, const char adrLI, const char adrLS);
 
 //UART write the flash memory address of the STM32Fxx with blocks of data 
-esp_err_t flashPage(char *address, char *data);
+esp_err_t flashPage(const char *address, const char *data);
+
+//UART read the flash memory address of the STM32Fxx and verify with the given block of data 
+esp_err_t readPage(const char *address, const char *data);
 
 #endif
