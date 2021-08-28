@@ -166,6 +166,8 @@ The program code uses only the path of the binary file to be flashed as a parame
 * [README Template](https://github.com/roshanlam/ReadMeTemplate) by [roshanlam](https://github.com/roshanlam)
 
 * [HackerNews Article: Updating STM32 Over-The-Air using ESP32](https://news.ycombinator.com/item?id=23302664)
+
+* [Reddit Post: Update STM32 Over-the-Air using ESP32](https://www.reddit.com/r/esp32/comments/jx399y/update_stm32_overtheair_using_esp32/)
   
 ## License
 
