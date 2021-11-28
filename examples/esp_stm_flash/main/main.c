@@ -12,7 +12,7 @@ void initTask(void)
 void app_main(void)
 {
     logI(TAG, "%s", "Starting flashing procedure...");
-    
+
     initTask();
     flashSTM("blink.bin");
     endConn();

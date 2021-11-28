@@ -87,9 +87,8 @@ esp_err_t flashSTM(const char *file_name)
             IS_ESP_OK(readTask(flash_file));
 
             err = ESP_OK;
+            logI(TAG_STM_FLASH, "%s", "STM32 Flashed Successfully!!!");
         } while (0);
-
-        logI(TAG_STM_FLASH, "%s", "STM32 Flashed Successfully!!!");
     }
 
     logI(TAG_STM_FLASH, "%s", "Ending Connection");
