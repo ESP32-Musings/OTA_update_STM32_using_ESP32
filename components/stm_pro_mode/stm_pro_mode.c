@@ -16,7 +16,6 @@ void initFlashUART(void)
 
     uart_param_config(UART_CONTROLLER, &uart_config);
     uart_set_pin(UART_CONTROLLER, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    uart_set_rts(UART_CONTROLLER, 1);
 
     logI(TAG_STM_PRO, "%s", "Initialized Flash UART");
 }
