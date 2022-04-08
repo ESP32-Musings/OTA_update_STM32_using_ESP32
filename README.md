@@ -46,9 +46,9 @@
 
 ## About the Project
 
-The project aims at enabling firmware update of STM32Fxx series MCUs Over-the-Air using ESP32.
+The project aims at enabling firmware update of STM32Fxx and STM32Gxx series MCUs Over-the-Air using ESP32.
 
-Testing was done with ESP32-DevKitC v4 board and STM32F103C8T6 ([Blue Pill](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)) and [STM32F072C8T6](https://www.st.com/en/microcontrollers-microprocessors/stm32f072c8.html). You can try with any other STM32Fxx MCUs and let us know how it worked out.
+Testing was done with ESP32-DevKitC v4 board and STM32F103C8T6 ([Blue Pill](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)), [STM32F072C8T6](https://www.st.com/en/microcontrollers-microprocessors/stm32f072c8.html) and STM32G431KB ([NUCLEO-G431KB](https://www.st.com/en/evaluation-tools/nucleo-g431kb.html)). You can try with any other STM32Fxx/STM32Gxx MCUs and let us know how it worked out. 
 
 ### Code
 
@@ -137,6 +137,25 @@ The program code uses only the path of the binary file to be flashed as a parame
 5. **Revert** the BOOT0 pin to its initial position and press the RESET Button on the STM32.
 6. Voila! your STM32 is now running the code you uploaded Over-the-Air!
 
+## Compatibility
+According to ST documentation this project could be compatible with a wide range of microcontrollers, **prior to some customization**:
+- **STM32F0 Series (verified)**
+- **STM32F1 Series (verified)**
+- STM32F2 Series
+- STM32F3 Series
+- STM32F4 Series
+- STM32F7 Series
+- STM32G0 Series
+- **STM32G4 Series (verified)**
+- STM32H7 Series
+- STM32L0 Series
+- STM32L1 Series
+- STM32L4 Series
+- STM32L5 Series
+- STM32U5 Series
+- STM32WB Series
+- STM32WL Series
+
 ## Troubleshooting
 
 * Check your wiring. Make sure that the ESP32 and STM32 are powered separately. Don't power one MCU using the other.
@@ -154,6 +173,8 @@ The program code uses only the path of the binary file to be flashed as a parame
 **For OTA updates for AVR MCUs, you can follow this [project](https://github.com/laukik-hase/OTA_update_AVR_using_ESP32/).**
 
 ## Acknowledgements and Resources
+
+Read carefully the Boot Mode Procedure (AN2606) and the USART protocol used in Bootloader Mode (AN3105) in order to deeply understand how use this script with other SMT32 micros.
 
 * STM32 USART Protocol: [Documentation](https://www.st.com/content/ccc/resource/technical/document/application_note/51/5f/03/1e/bd/9b/45/be/CD00264342.pdf/files/CD00264342.pdf/jcr:content/translations/en.CD00264342.pdf)
 
