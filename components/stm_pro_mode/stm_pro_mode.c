@@ -246,9 +246,9 @@ int waitForSerialData(int dataCount, int timeout)
     int timer = 0;
     int length = 0;
 	
-	const int ticks = pdMS_TO_TICKS(timeout);
+	int ticks = pdMS_TO_TICKS(timeout);
 	// Minimum one ticks
-	if (ticks < 1)
+	if (ticks == 0)
 		ticks = 1;
 		
     while (timer < ticks)
