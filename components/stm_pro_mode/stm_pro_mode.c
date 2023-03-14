@@ -245,14 +245,21 @@ int waitForSerialData(int dataCount, int timeout)
 {
     int timer = 0;
     int length = 0;
-    while (timer < timeout)
+	
+	int ticks = pdMS_TO_TICKS(timeout);
+	// Minimum one ticks
+	if (ticks == 0)
+		ticks = 1;
+		
+    while (timer < ticks)
     {
         uart_get_buffered_data_len(UART_CONTROLLER, (size_t *)&length);
         if (length >= dataCount)
         {
             return length;
         }
-        vTaskDelay(1 / portTICK_PERIOD_MS);
+		
+        vTaskDelay(1);
         timer++;
     }
     return 0;
