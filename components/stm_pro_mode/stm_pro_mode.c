@@ -15,21 +15,22 @@
 #include "esp_event.h"
 #include "esp_log.h"
 
+#include "sdkconfig.h"
 #include "stm_pro_mode.h"
 
 #define HIGH              (1)
 #define LOW               (0)
 #define ACK               (0x79)
-#define SERIAL_TIMEOUT_MS (5000)
 
-#define TXD_PIN           (GPIO_NUM_4)
-#define RXD_PIN           (GPIO_NUM_5)
-#define RESET_PIN         (GPIO_NUM_19)
-#define BOOT0_PIN         (GPIO_NUM_21)
+#define TXD_PIN           (CONFIG_ESP_STM_UART_TXD)
+#define RXD_PIN           (CONFIG_ESP_STM_UART_RXD)
+#define RESET_PIN         (CONFIG_ESP_STM_RESET_PIN)
+#define BOOT0_PIN         (CONFIG_ESP_STM_BOOT0_PIN)
 
-#define UART_BAUD_RATE    (115200)
-#define UART_CONTROLLER   (UART_NUM_1)
-#define UART_BUF_SIZE     (1024)
+#define UART_BAUD_RATE    (CONFIG_ESP_STM_UART_BAUD_RATE)
+#define UART_CONTROLLER   (CONFIG_ESP_STM_UART_PORT_NUM)
+#define SERIAL_TIMEOUT_MS (CONFIG_ESP_STM_UART_SERIAL_TIMEOUT_MS)
+#define UART_BUF_SIZE     (2048)
 
 static const char *TAG_STM_PRO = "stm_pro_mode";
 
@@ -43,7 +44,7 @@ void initFlashUART(void)
         .stop_bits = UART_STOP_BITS_1,
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
 
-    uart_driver_install(UART_CONTROLLER, UART_BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_driver_install(UART_CONTROLLER, UART_BUF_SIZE, 0, 0, NULL, 0);
 
     uart_param_config(UART_CONTROLLER, &uart_config);
     uart_set_pin(UART_CONTROLLER, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);

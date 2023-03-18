@@ -1,0 +1,55 @@
+menu "STM32 UART Flashing Configuration"
+
+    config ESP_STM_UART_PORT_NUM
+        int "UART port number"
+        range 0 2
+        default 1
+        help
+            UART communication port number for ESP32-STM32 connection
+
+    config ESP_STM_UART_BAUD_RATE
+        int "UART communication speed"
+        range 1200 115200
+        default 115200
+        help
+            UART communication speed for ESP32-STM32 connection
+
+    config ESP_STM_UART_RXD
+        int "UART RXD pin number"
+        range 0 34
+        default 5
+        help
+            GPIO number for UART RX pin
+            See UART documentation for more information about available pin numbers for UART.
+
+    config ESP_STM_UART_TXD
+        int "UART TXD pin number"
+        range 0 34
+        default 4
+        help
+            GPIO number for UART TX pin
+            See UART documentation for more information about available pin numbers for UART.
+
+    config ESP_STM_RESET_PIN
+        int "GPIO connected to STM32 RST pin"
+        range 0 34
+        default 19
+        help
+            GPIO connected to STM32 RST pin
+
+    config ESP_STM_BOOT0_PIN
+        int "GPIO connected to STM32 BOOT0 pin"
+        range 0 34
+        default 21
+        help
+            GPIO connected to STM32 BOOT0 pin
+
+
+    config ESP_STM_UART_SERIAL_TIMEOUT_MS
+        int "Timeout (in ms) for ESP32-STM32 UART connection"
+        range 0 30000
+        default 5000
+        help
+            Timeout (in ms) for ESP32-STM32 UART connection
+
+endmenu
