@@ -17,12 +17,12 @@ void initFlashUART(void)
     uart_param_config(UART_CONTROLLER, &uart_config);
     uart_set_pin(UART_CONTROLLER, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
-    logI(TAG_STM_PRO, "%s", "Initialized Flash UART");
+    ESP_LOGI(TAG_STM_PRO, "Initialized Flash UART");
 }
 
 void initSPIFFS(void)
 {
-    logI(TAG_STM_PRO, "%s", "Initializing SPIFFS");
+    ESP_LOGI(TAG_STM_PRO, "Initializing SPIFFS");
 
     esp_vfs_spiffs_conf_t conf =
         {
@@ -37,31 +37,23 @@ void initSPIFFS(void)
     {
         if (ret == ESP_FAIL)
         {
-            logE(TAG_STM_PRO, "%s", "Failed to mount or format filesystem");
+            ESP_LOGE(TAG_STM_PRO, "Failed to mount or format filesystem");
         }
         else if (ret == ESP_ERR_NOT_FOUND)
         {
-            logE(TAG_STM_PRO, "%s", "Failed to find SPIFFS partition");
+            ESP_LOGE(TAG_STM_PRO, "Failed to find SPIFFS partition");
         }
         else
         {
-            logE(TAG_STM_PRO, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+            ESP_LOGE(TAG_STM_PRO, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
         }
         return;
     }
-
-/*  // Formatting SPIFFS - Use only for debugging
-    if (esp_spiffs_format(NULL) != ESP_OK)
-    {
-        logE(TAG_STM_PRO, "%s", "Failed to format SPIFFS");
-        return;
-    }
-*/
 
     size_t total, used;
     if (esp_spiffs_info(NULL, &total, &used) == ESP_OK)
     {
-        logI(TAG_STM_PRO, "Partition size: total: %d, used: %d", total, used);
+        ESP_LOGI(TAG_STM_PRO, "Partition size: total: %d, used: %d", total, used);
     }
 }
 
@@ -72,19 +64,19 @@ void initGPIO(void)
     gpio_set_direction(BOOT0_PIN, GPIO_MODE_OUTPUT);
     gpio_set_level(BOOT0_PIN, HIGH);
 
-    logI(TAG_STM_PRO, "%s", "GPIO Initialized");
+    ESP_LOGI(TAG_STM_PRO, "GPIO Initialized");
 }
 
 void resetSTM(void)
 {
-    logI(TAG_STM_PRO, "%s", "Starting RESET Procedure");
+    ESP_LOGI(TAG_STM_PRO, "Starting RESET Procedure");
 
     gpio_set_level(RESET_PIN, LOW);
     vTaskDelay(100 / portTICK_PERIOD_MS);
     gpio_set_level(RESET_PIN, HIGH);
     vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    logI(TAG_STM_PRO, "%s", "Finished RESET Procedure");
+    ESP_LOGI(TAG_STM_PRO, "Finished RESET Procedure");
 }
 
 void endConn(void)
@@ -94,7 +86,7 @@ void endConn(void)
 
     resetSTM();
 
-    logI(TAG_STM_PRO, "%s", "Ending Connection");
+    ESP_LOGI(TAG_STM_PRO, "Ending Connection");
 }
 
 void setupSTM(void)
@@ -110,7 +102,7 @@ void setupSTM(void)
 
 int cmdSync(void)
 {
-    logI(TAG_STM_PRO, "%s", "SYNC");
+    ESP_LOGI(TAG_STM_PRO, "SYNC");
 
     char bytes[] = {0x7F};
     int resp = 1;
@@ -119,7 +111,7 @@ int cmdSync(void)
 
 int cmdGet(void)
 {
-    logI(TAG_STM_PRO, "%s", "GET");
+    ESP_LOGI(TAG_STM_PRO, "GET");
 
     char bytes[] = {0x00, 0xFF};
     int resp = 15;
@@ -128,7 +120,7 @@ int cmdGet(void)
 
 int cmdVersion(void)
 {
-    logI(TAG_STM_PRO, "%s", "GET VERSION & READ PROTECTION STATUS");
+    ESP_LOGI(TAG_STM_PRO, "GET VERSION & READ PROTECTION STATUS");
 
     char bytes[] = {0x01, 0xFE};
     int resp = 5;
@@ -137,7 +129,7 @@ int cmdVersion(void)
 
 int cmdId(void)
 {
-    logI(TAG_STM_PRO, "%s", "CHECK ID");
+    ESP_LOGI(TAG_STM_PRO, "CHECK ID");
     char bytes[] = {0x02, 0xFD};
     int resp = 5;
     return sendBytes(bytes, sizeof(bytes), resp);
@@ -145,7 +137,7 @@ int cmdId(void)
 
 int cmdErase(void)
 {
-    logI(TAG_STM_PRO, "%s", "ERASE MEMORY");
+    ESP_LOGI(TAG_STM_PRO, "ERASE MEMORY");
     char bytes[] = {0x43, 0xBC};
     int resp = 1;
     int a = sendBytes(bytes, sizeof(bytes), resp);
@@ -162,7 +154,7 @@ int cmdErase(void)
 
 int cmdExtErase(void)
 {
-    logI(TAG_STM_PRO, "%s", "EXTENDED ERASE MEMORY");
+    ESP_LOGI(TAG_STM_PRO, "EXTENDED ERASE MEMORY");
     char bytes[] = {0x44, 0xBB};
     int resp = 1;
     int a = sendBytes(bytes, sizeof(bytes), resp);
@@ -179,7 +171,7 @@ int cmdExtErase(void)
 
 int cmdWrite(void)
 {
-    logI(TAG_STM_PRO, "%s", "WRITE MEMORY");
+    ESP_LOGI(TAG_STM_PRO, "WRITE MEMORY");
     char bytes[2] = {0x31, 0xCE};
     int resp = 1;
     return sendBytes(bytes, sizeof(bytes), resp);
@@ -187,7 +179,7 @@ int cmdWrite(void)
 
 int cmdRead(void)
 {
-    logI(TAG_STM_PRO, "%s", "READ MEMORY");
+    ESP_LOGI(TAG_STM_PRO, "READ MEMORY");
     char bytes[2] = {0x11, 0xEE};
     int resp = 1;
     return sendBytes(bytes, sizeof(bytes), resp);
@@ -215,19 +207,19 @@ int sendBytes(const char *bytes, int count, int resp)
 
         if (rxBytes > 0 && data[0] == ACK)
         {
-            logI(TAG_STM_PRO, "%s", "Sync Success");
-            // ESP_LOG_BUFFER_HEXDUMP("SYNC", data, rxBytes, ESP_LOG_DEBUG);
+            ESP_LOGI(TAG_STM_PRO, "Sync Success");
+            ESP_LOG_BUFFER_HEXDUMP("SYNC", data, rxBytes, ESP_LOG_DEBUG);
             return 1;
         }
         else
         {
-            logE(TAG_STM_PRO, "%s", "Sync Failure");
+            ESP_LOGE(TAG_STM_PRO, "Sync Failure");
             return 0;
         }
     }
     else
     {
-        logE(TAG_STM_PRO, "%s", "Serial Timeout");
+        ESP_LOGE(TAG_STM_PRO, "Serial Timeout");
         return 0;
     }
 
@@ -237,7 +229,7 @@ int sendBytes(const char *bytes, int count, int resp)
 int sendData(const char *logName, const char *data, const int count)
 {
     const int txBytes = uart_write_bytes(UART_CONTROLLER, data, count);
-    //logD(logName, "Wrote %d bytes", count);
+    ESP_LOGD(logName, "Wrote %d bytes", count);
     return txBytes;
 }
 
@@ -275,7 +267,7 @@ void incrementLoadAddress(char *loadAddr)
 
 esp_err_t flashPage(const char *address, const char *data)
 {
-    logI(TAG_STM_PRO, "%s", "Flashing Page");
+    ESP_LOGI(TAG_STM_PRO, "Flashing Page");
 
     cmdWrite();
 
@@ -303,25 +295,25 @@ esp_err_t flashPage(const char *address, const char *data)
         const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
         if (rxBytes > 0 && data[0] == ACK)
         {
-            logI(TAG_STM_PRO, "%s", "Flash Success");
+            ESP_LOGI(TAG_STM_PRO, "Flash Success");
             return ESP_OK;
         }
         else
         {
-            logE(TAG_STM_PRO, "%s", "Flash Failure");
+            ESP_LOGE(TAG_STM_PRO, "Flash Failure");
             return ESP_FAIL;
         }
     }
     else
     {
-        logE(TAG_STM_PRO, "%s", "Serial Timeout");
+        ESP_LOGE(TAG_STM_PRO, "Serial Timeout");
     }
     return ESP_FAIL;
 }
 
 esp_err_t readPage(const char *address, const char *data)
 {
-    logI(TAG_STM_PRO, "%s", "Reading page");
+    ESP_LOGI(TAG_STM_PRO, "Reading page");
     char param[] = {0xFF, 0x00};
 
     cmdRead();
@@ -337,23 +329,22 @@ esp_err_t readPage(const char *address, const char *data)
 
         if (rxBytes > 0 && uart_data[0] == 0x79)
         {
-            logI(TAG_STM_PRO, "%s", "Success");
+            ESP_LOGI(TAG_STM_PRO, "Success");
             if (!memcpy((void *)data, uart_data, 257))
             {
                 return ESP_FAIL;
             }
-
-            //ESP_LOG_BUFFER_HEXDUMP("READ MEMORY", data, rxBytes, ESP_LOG_DEBUG);
+            ESP_LOG_BUFFER_HEXDUMP("READ MEMORY", data, rxBytes, ESP_LOG_DEBUG);
         }
         else
         {
-            logE(TAG_STM_PRO, "%s", "Failure");
+            ESP_LOGE(TAG_STM_PRO, "Failure");
             return ESP_FAIL;
         }
     }
     else
     {
-        logE(TAG_STM_PRO, "%s", "Serial Timeout");
+        ESP_LOGE(TAG_STM_PRO, "Serial Timeout");
         return ESP_FAIL;
     }
 

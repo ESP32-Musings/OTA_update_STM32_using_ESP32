@@ -29,7 +29,7 @@
 #include "esp_http_server.h"
 
 #include "nvs_flash.h"
-#include "logger.h"
+#include "esp_log.h"
 
 //Macro for error checking
 #define IS_ESP_OK(x) if ((x) != ESP_OK) break;

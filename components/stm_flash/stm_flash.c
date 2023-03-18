@@ -4,7 +4,7 @@ static const char *TAG_STM_FLASH = "stm_flash";
 
 esp_err_t writeTask(FILE *flash_file)
 {
-    logI(TAG_STM_FLASH, "%s", "Write Task");
+    ESP_LOGI(TAG_STM_FLASH, "Write Task");
 
     char loadAddress[4] = {0x08, 0x00, 0x00, 0x00};
     char block[256] = {0};
@@ -16,8 +16,8 @@ esp_err_t writeTask(FILE *flash_file)
     while ((bytes_read = fread(block, 1, 256, flash_file)) > 0)
     {
         curr_block++;
-        logI(TAG_STM_FLASH, "Writing block: %d", curr_block);
-        // ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
+        ESP_LOGI(TAG_STM_FLASH, "Writing block: %d", curr_block);
+        ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
 
         esp_err_t ret = flashPage(loadAddress, block);
         if (ret == ESP_FAIL)
@@ -36,7 +36,7 @@ esp_err_t writeTask(FILE *flash_file)
 
 esp_err_t readTask(FILE *flash_file)
 {
-    logI(TAG_STM_FLASH, "%s", "Read & Verification Task");
+    ESP_LOGI(TAG_STM_FLASH, "Read & Verification Task");
     char readAddress[4] = {0x08, 0x00, 0x00, 0x00};
 
     char block[257] = {0};
@@ -47,8 +47,8 @@ esp_err_t readTask(FILE *flash_file)
     while ((bytes_read = fread(block, 1, 256, flash_file)) > 0)
     {
         curr_block++;
-        logI(TAG_STM_FLASH, "Reading block: %d", curr_block);
-        // ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
+        ESP_LOGI(TAG_STM_FLASH, "Reading block: %d", curr_block);
+        ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
 
         esp_err_t ret = readPage(readAddress, block);
         if (ret == ESP_FAIL)
@@ -71,7 +71,7 @@ esp_err_t flashSTM(const char *file_name)
 
     char file_path[FILE_PATH_MAX];
     sprintf(file_path, "%s%s", BASE_PATH, file_name);
-    logD(TAG_STM_FLASH, "File name: %s", file_path);
+    ESP_LOGD(TAG_STM_FLASH, "File name: %s", file_path);
 
     initGPIO();
     FILE *flash_file = fopen(file_path, "rb");
@@ -80,21 +80,21 @@ esp_err_t flashSTM(const char *file_name)
         // This while loop executes only once and breaks if any of the functions do not return ESP_OK
         do
         {
-            logI(TAG_STM_FLASH, "%s", "Writing STM32 Memory");
+            ESP_LOGI(TAG_STM_FLASH, "Writing STM32 Memory");
             IS_ESP_OK(writeTask(flash_file));
 
-            logI(TAG_STM_FLASH, "%s", "Reading STM32 Memory");
+            ESP_LOGI(TAG_STM_FLASH, "Reading STM32 Memory");
             IS_ESP_OK(readTask(flash_file));
 
             err = ESP_OK;
-            logI(TAG_STM_FLASH, "%s", "STM32 Flashed Successfully!!!");
+            ESP_LOGI(TAG_STM_FLASH, "STM32 Flashed Successfully!!!");
         } while (0);
     }
 
-    logI(TAG_STM_FLASH, "%s", "Ending Connection");
+    ESP_LOGI(TAG_STM_FLASH, "Ending Connection");
     endConn();
 
-    logI(TAG_STM_FLASH, "%s", "Closing file");
+    ESP_LOGI(TAG_STM_FLASH, "Closing file");
     fclose(flash_file);
 
     return err;

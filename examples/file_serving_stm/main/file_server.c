@@ -441,7 +441,7 @@ static esp_err_t flash_post_handler(httpd_req_t *req)
     filename++;
     if (flashSTM(filename) != ESP_OK)
     {
-        logE(TAG, "%s", "Target flashing failed");
+        ESP_LOGE(TAG, "Target flashing failed!");
     }
 
     httpd_resp_set_status(req, "303 See Other");
