@@ -1,55 +1,10 @@
-#ifndef _STM_PRO_MODE_H
-#define _STM_PRO_MODE_H
+#pragma once
 
 #include <stdio.h>
-#include <math.h>
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
-#include <dirent.h>
-
-#include <sys/unistd.h>
-#include <sys/stat.h>
-#include <sys/param.h>
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-
-#include "driver/uart.h"
-#include "driver/gpio.h"
-
 #include "esp_err.h"
-#include "esp_vfs.h"
-#include "esp_system.h"
-#include "esp_spiffs.h"
-
-#include "esp_event.h"
-#include "esp_wifi.h"
-#include "esp_http_server.h"
-
-#include "nvs_flash.h"
-#include "esp_log.h"
 
 //Macro for error checking
 #define IS_ESP_OK(x) if ((x) != ESP_OK) break;
-
-#define TXD_PIN (GPIO_NUM_4) //(GPIO_NUM_1)
-#define RXD_PIN (GPIO_NUM_5) //(GPIO_NUM_3)
-#define UART_BAUD_RATE 115200
-#define UART_BUF_SIZE 1024
-#define UART_CONTROLLER UART_NUM_1
-
-#define RESET_PIN (GPIO_NUM_19) //(GPIO_NUM_12)
-#define BOOT0_PIN (GPIO_NUM_21) //(GPIO_NUM_2)
-#define HIGH 1
-#define LOW 0
-
-#define ACK 0x79
-#define SERIAL_TIMEOUT 5000
-
-#define FILE_PATH_MAX 128
-#define BASE_PATH "/spiffs/"
 
 //Initialize UART functionalities
 void initFlashUART(void);
@@ -113,5 +68,3 @@ esp_err_t flashPage(const char *address, const char *data);
 
 //UART read the flash memory address of the STM32Fxx and verify with the given block of data 
 esp_err_t readPage(const char *address, const char *data);
-
-#endif

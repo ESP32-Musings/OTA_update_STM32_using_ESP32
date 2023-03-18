@@ -1,4 +1,35 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include "driver/uart.h"
+#include "driver/gpio.h"
+
+#include "esp_err.h"
+#include "esp_vfs.h"
+#include "esp_spiffs.h"
+
+#include "esp_event.h"
+#include "esp_log.h"
+
 #include "stm_pro_mode.h"
+
+#define HIGH              (1)
+#define LOW               (0)
+#define ACK               (0x79)
+#define SERIAL_TIMEOUT_MS (5000)
+
+#define TXD_PIN           (GPIO_NUM_4)
+#define RXD_PIN           (GPIO_NUM_5)
+#define RESET_PIN         (GPIO_NUM_19)
+#define BOOT0_PIN         (GPIO_NUM_21)
+
+#define UART_BAUD_RATE    (115200)
+#define UART_CONTROLLER   (UART_NUM_1)
+#define UART_BUF_SIZE     (1024)
 
 static const char *TAG_STM_PRO = "stm_pro_mode";
 
@@ -198,7 +229,7 @@ int loadAddress(const char adrMS, const char adrMI, const char adrLI, const char
 int sendBytes(const char *bytes, int count, int resp)
 {
     sendData(TAG_STM_PRO, bytes, count);
-    int length = waitForSerialData(resp, SERIAL_TIMEOUT);
+    int length = waitForSerialData(resp, SERIAL_TIMEOUT_MS);
 
     if (length > 0)
     {
@@ -288,7 +319,7 @@ esp_err_t flashPage(const char *address, const char *data)
 
     sendData(TAG_STM_PRO, &xor, 1);
 
-    int length = waitForSerialData(1, SERIAL_TIMEOUT);
+    int length = waitForSerialData(1, SERIAL_TIMEOUT_MS);
     if (length > 0)
     {
         uint8_t data[length];
@@ -321,7 +352,7 @@ esp_err_t readPage(const char *address, const char *data)
     loadAddress(address[0], address[1], address[2], address[3]);
 
     sendData(TAG_STM_PRO, param, sizeof(param));
-    int length = waitForSerialData(257, SERIAL_TIMEOUT);
+    int length = waitForSerialData(257, SERIAL_TIMEOUT_MS);
     if (length > 0)
     {
         uint8_t uart_data[length];

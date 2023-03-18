@@ -1,4 +1,12 @@
+#include <stdint.h>
+#include <string.h>
+
+#include "esp_log.h"
+
 #include "stm_flash.h"
+
+#define FILE_PATH_MAX (128)
+#define BASE_PATH     "/spiffs/"
 
 static const char *TAG_STM_FLASH = "stm_flash";
 

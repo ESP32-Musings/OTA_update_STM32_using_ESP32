@@ -1,4 +1,21 @@
+#include <stdio.h>
+#include <string.h>
+#include <sys/param.h>
+#include <sys/unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+#include "esp_err.h"
+#include "esp_log.h"
+
+#include "esp_vfs.h"
+#include "esp_spiffs.h"
+#include "esp_http_server.h"
+
 #include "stm_flash.h"
+
+/* Max length a file path can have on storage */
+#define FILE_PATH_MAX (128)
 
 /* Max size of an individual file. Make sure this
  * value is same as that set in upload_script.html */
