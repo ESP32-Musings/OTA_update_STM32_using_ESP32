@@ -42,7 +42,8 @@ void initFlashUART(void)
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_EVEN,
         .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
 
     uart_driver_install(UART_CONTROLLER, UART_BUF_SIZE, 0, 0, NULL, 0);
 
@@ -56,35 +57,28 @@ void initSPIFFS(void)
 {
     ESP_LOGI(TAG_STM_PRO, "Initializing SPIFFS");
 
-    esp_vfs_spiffs_conf_t conf =
-        {
-            .base_path = "/spiffs",
-            .partition_label = NULL,
-            .max_files = 5,
-            .format_if_mount_failed = true};
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true
+    };
 
     esp_err_t ret = esp_vfs_spiffs_register(&conf);
 
-    if (ret != ESP_OK)
-    {
-        if (ret == ESP_FAIL)
-        {
+    if (ret != ESP_OK) {
+        if (ret == ESP_FAIL) {
             ESP_LOGE(TAG_STM_PRO, "Failed to mount or format filesystem");
-        }
-        else if (ret == ESP_ERR_NOT_FOUND)
-        {
+        } else if (ret == ESP_ERR_NOT_FOUND) {
             ESP_LOGE(TAG_STM_PRO, "Failed to find SPIFFS partition");
-        }
-        else
-        {
+        } else {
             ESP_LOGE(TAG_STM_PRO, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
         }
         return;
     }
 
     size_t total, used;
-    if (esp_spiffs_info(NULL, &total, &used) == ESP_OK)
-    {
+    if (esp_spiffs_info(NULL, &total, &used) == ESP_OK) {
         ESP_LOGI(TAG_STM_PRO, "Partition size: total: %d, used: %d", total, used);
     }
 }
@@ -174,8 +168,7 @@ int cmdErase(void)
     int resp = 1;
     int a = sendBytes(bytes, sizeof(bytes), resp);
 
-    if (a == 1)
-    {
+    if (a == 1) {
         char params[] = {0xFF, 0x00};
         resp = 1;
 
@@ -191,8 +184,7 @@ int cmdExtErase(void)
     int resp = 1;
     int a = sendBytes(bytes, sizeof(bytes), resp);
 
-    if (a == 1)
-    {
+    if (a == 1) {
         char params[] = {0xFF, 0xFF, 0x00};
         resp = 1;
 
@@ -232,25 +224,19 @@ int sendBytes(const char *bytes, int count, int resp)
     sendData(TAG_STM_PRO, bytes, count);
     int length = waitForSerialData(resp, SERIAL_TIMEOUT_MS);
 
-    if (length > 0)
-    {
+    if (length > 0) {
         uint8_t data[length];
         const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
 
-        if (rxBytes > 0 && data[0] == ACK)
-        {
+        if (rxBytes > 0 && data[0] == ACK) {
             ESP_LOGI(TAG_STM_PRO, "Sync Success");
             ESP_LOG_BUFFER_HEXDUMP("SYNC", data, rxBytes, ESP_LOG_DEBUG);
             return 1;
-        }
-        else
-        {
+        } else {
             ESP_LOGE(TAG_STM_PRO, "Sync Failure");
             return 0;
         }
-    }
-    else
-    {
+    } else {
         ESP_LOGE(TAG_STM_PRO, "Serial Timeout");
         return 0;
     }
@@ -269,11 +255,9 @@ int waitForSerialData(int dataCount, int timeout)
 {
     int timer = 0;
     int length = 0;
-    while (timer < timeout)
-    {
+    while (timer < timeout) {
         uart_get_buffered_data_len(UART_CONTROLLER, (size_t *)&length);
-        if (length >= dataCount)
-        {
+        if (length >= dataCount) {
             return length;
         }
         vTaskDelay(1 / portTICK_PERIOD_MS);
@@ -286,12 +270,10 @@ void incrementLoadAddress(char *loadAddr)
 {
     loadAddr[2] += 0x1;
 
-    if (loadAddr[2] == 0)
-    {
+    if (loadAddr[2] == 0) {
         loadAddr[1] += 0x1;
 
-        if (loadAddr[1] == 0)
-        {
+        if (loadAddr[1] == 0) {
             loadAddr[0] += 0x1;
         }
     }
@@ -312,8 +294,7 @@ esp_err_t flashPage(const char *address, const char *data)
 
     sendData(TAG_STM_PRO, &sz, 1);
 
-    for (int i = 0; i < 256; i++)
-    {
+    for (int i = 0; i < 256; i++) {
         sendData(TAG_STM_PRO, &data[i], 1);
         xor ^= data[i];
     }
@@ -321,23 +302,17 @@ esp_err_t flashPage(const char *address, const char *data)
     sendData(TAG_STM_PRO, &xor, 1);
 
     int length = waitForSerialData(1, SERIAL_TIMEOUT_MS);
-    if (length > 0)
-    {
+    if (length > 0) {
         uint8_t data[length];
         const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
-        if (rxBytes > 0 && data[0] == ACK)
-        {
+        if (rxBytes > 0 && data[0] == ACK) {
             ESP_LOGI(TAG_STM_PRO, "Flash Success");
             return ESP_OK;
-        }
-        else
-        {
+        } else {
             ESP_LOGE(TAG_STM_PRO, "Flash Failure");
             return ESP_FAIL;
         }
-    }
-    else
-    {
+    } else {
         ESP_LOGE(TAG_STM_PRO, "Serial Timeout");
     }
     return ESP_FAIL;
@@ -354,28 +329,21 @@ esp_err_t readPage(const char *address, const char *data)
 
     sendData(TAG_STM_PRO, param, sizeof(param));
     int length = waitForSerialData(257, SERIAL_TIMEOUT_MS);
-    if (length > 0)
-    {
+    if (length > 0) {
         uint8_t uart_data[length];
         const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, 1000 / portTICK_RATE_MS);
 
-        if (rxBytes > 0 && uart_data[0] == 0x79)
-        {
+        if (rxBytes > 0 && uart_data[0] == 0x79) {
             ESP_LOGI(TAG_STM_PRO, "Success");
-            if (!memcpy((void *)data, uart_data, 257))
-            {
+            if (!memcpy((void *)data, uart_data, 257)) {
                 return ESP_FAIL;
             }
             ESP_LOG_BUFFER_HEXDUMP("READ MEMORY", data, rxBytes, ESP_LOG_DEBUG);
-        }
-        else
-        {
+        } else {
             ESP_LOGE(TAG_STM_PRO, "Failure");
             return ESP_FAIL;
         }
-    }
-    else
-    {
+    } else {
         ESP_LOGE(TAG_STM_PRO, "Serial Timeout");
         return ESP_FAIL;
     }

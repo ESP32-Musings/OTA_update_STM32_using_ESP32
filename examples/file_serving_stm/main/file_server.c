@@ -27,8 +27,7 @@
 
 static const char *TAG = "FILE_SERVER_HTTP";
 
-struct file_server_data
-{
+struct file_server_data {
     /* Base path of file storage */
     char base_path[ESP_VFS_PATH_MAX + 1];
 
@@ -78,8 +77,7 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
     /* Retrieve the base path of file storage to construct the full path */
     strlcpy(entrypath, dirpath, sizeof(entrypath));
 
-    if (!dir)
-    {
+    if (!dir) {
         ESP_LOGE(TAG, "Failed to stat dir : %s", dirpath);
         /* Respond with 404 Not Found */
         httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Directory does not exist");
@@ -105,13 +103,11 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
                              "<tbody>");
 
     /* Iterate over all files / folders and fetch their names and sizes */
-    while ((entry = readdir(dir)) != NULL)
-    {
+    while ((entry = readdir(dir)) != NULL) {
         entrytype = (entry->d_type == DT_DIR ? "directory" : "file");
 
         strlcpy(entrypath + dirpath_len, entry->d_name, sizeof(entrypath) - dirpath_len);
-        if (stat(entrypath, &entry_stat) == -1)
-        {
+        if (stat(entrypath, &entry_stat) == -1) {
             ESP_LOGE(TAG, "Failed to stat %s : %s", entrytype, entry->d_name);
             continue;
         }
@@ -122,8 +118,7 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
         httpd_resp_sendstr_chunk(req, "<tr><td><a href=\"");
         httpd_resp_sendstr_chunk(req, req->uri);
         httpd_resp_sendstr_chunk(req, entry->d_name);
-        if (entry->d_type == DT_DIR)
-        {
+        if (entry->d_type == DT_DIR) {
             httpd_resp_sendstr_chunk(req, "/");
         }
         httpd_resp_sendstr_chunk(req, "\">");
@@ -165,20 +160,13 @@ static esp_err_t http_resp_dir_html(httpd_req_t *req, const char *dirpath)
 /* Set HTTP response content type according to file extension */
 static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filename)
 {
-    if (IS_FILE_EXT(filename, ".pdf"))
-    {
+    if (IS_FILE_EXT(filename, ".pdf")) {
         return httpd_resp_set_type(req, "application/pdf");
-    }
-    else if (IS_FILE_EXT(filename, ".html"))
-    {
+    } else if (IS_FILE_EXT(filename, ".html")) {
         return httpd_resp_set_type(req, "text/html");
-    }
-    else if (IS_FILE_EXT(filename, ".jpeg"))
-    {
+    } else if (IS_FILE_EXT(filename, ".jpeg")) {
         return httpd_resp_set_type(req, "image/jpeg");
-    }
-    else if (IS_FILE_EXT(filename, ".ico"))
-    {
+    } else if (IS_FILE_EXT(filename, ".ico")) {
         return httpd_resp_set_type(req, "image/x-icon");
     }
     /* This is a limited set only */
@@ -194,18 +182,15 @@ static const char *get_path_from_uri(char *dest, const char *base_path, const ch
     size_t pathlen = strlen(uri);
 
     const char *quest = strchr(uri, '?');
-    if (quest)
-    {
+    if (quest) {
         pathlen = MIN(pathlen, quest - uri);
     }
     const char *hash = strchr(uri, '#');
-    if (hash)
-    {
+    if (hash) {
         pathlen = MIN(pathlen, hash - uri);
     }
 
-    if (base_pathlen + pathlen + 1 > destsize)
-    {
+    if (base_pathlen + pathlen + 1 > destsize) {
         /* Full path string won't fit into destination buffer */
         return NULL;
     }
@@ -226,9 +211,8 @@ static esp_err_t download_get_handler(httpd_req_t *req)
     struct stat file_stat;
 
     const char *filename = get_path_from_uri(filepath, ((struct file_server_data *)req->user_ctx)->base_path,
-                                             req->uri, sizeof(filepath));
-    if (!filename)
-    {
+                           req->uri, sizeof(filepath));
+    if (!filename) {
         ESP_LOGE(TAG, "Filename is too long");
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
@@ -236,21 +220,16 @@ static esp_err_t download_get_handler(httpd_req_t *req)
     }
 
     /* If name has trailing '/', respond with directory contents */
-    if (filename[strlen(filename) - 1] == '/')
-    {
+    if (filename[strlen(filename) - 1] == '/') {
         return http_resp_dir_html(req, filepath);
     }
 
-    if (stat(filepath, &file_stat) == -1)
-    {
+    if (stat(filepath, &file_stat) == -1) {
         /* If file not present on SPIFFS check if URI
          * corresponds to one of the hardcoded paths */
-        if (strcmp(filename, "/index.html") == 0)
-        {
+        if (strcmp(filename, "/index.html") == 0) {
             return index_html_get_handler(req);
-        }
-        else if (strcmp(filename, "/favicon.ico") == 0)
-        {
+        } else if (strcmp(filename, "/favicon.ico") == 0) {
             return favicon_get_handler(req);
         }
         ESP_LOGE(TAG, "Failed to stat file : %s", filepath);
@@ -260,8 +239,7 @@ static esp_err_t download_get_handler(httpd_req_t *req)
     }
 
     fd = fopen(filepath, "r");
-    if (!fd)
-    {
+    if (!fd) {
         ESP_LOGE(TAG, "Failed to read existing file : %s", filepath);
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to read existing file");
@@ -274,14 +252,12 @@ static esp_err_t download_get_handler(httpd_req_t *req)
     /* Retrieve the pointer to scratch buffer for temporary storage */
     char *chunk = ((struct file_server_data *)req->user_ctx)->scratch;
     size_t chunksize;
-    do
-    {
+    do {
         /* Read file in chunks into the scratch buffer */
         chunksize = fread(chunk, 1, SCRATCH_BUFSIZE, fd);
 
         /* Send the buffer contents as HTTP response chunk */
-        if (httpd_resp_send_chunk(req, chunk, chunksize) != ESP_OK)
-        {
+        if (httpd_resp_send_chunk(req, chunk, chunksize) != ESP_OK) {
             fclose(fd);
             ESP_LOGE(TAG, "File sending failed!");
             /* Abort sending file */
@@ -313,24 +289,21 @@ static esp_err_t upload_post_handler(httpd_req_t *req)
     /* Skip leading "/upload" from URI to get filename */
     /* Note sizeof() counts NULL termination hence the -1 */
     const char *filename = get_path_from_uri(filepath, ((struct file_server_data *)req->user_ctx)->base_path,
-                                             req->uri + sizeof("/upload") - 1, sizeof(filepath));
-    if (!filename)
-    {
+                           req->uri + sizeof("/upload") - 1, sizeof(filepath));
+    if (!filename) {
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
         return ESP_FAIL;
     }
 
     /* Filename cannot have a trailing '/' */
-    if (filename[strlen(filename) - 1] == '/')
-    {
+    if (filename[strlen(filename) - 1] == '/') {
         ESP_LOGE(TAG, "Invalid filename : %s", filename);
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid filename");
         return ESP_FAIL;
     }
 
-    if (stat(filepath, &file_stat) == 0)
-    {
+    if (stat(filepath, &file_stat) == 0) {
         ESP_LOGE(TAG, "File already exists : %s", filepath);
         /* Respond with 400 Bad Request */
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "File already exists");
@@ -338,8 +311,7 @@ static esp_err_t upload_post_handler(httpd_req_t *req)
     }
 
     /* File cannot be larger than a limit */
-    if (req->content_len > MAX_FILE_SIZE)
-    {
+    if (req->content_len > MAX_FILE_SIZE) {
         ESP_LOGE(TAG, "File too large : %d bytes", req->content_len);
         /* Respond with 400 Bad Request */
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
@@ -350,8 +322,7 @@ static esp_err_t upload_post_handler(httpd_req_t *req)
     }
 
     fd = fopen(filepath, "w");
-    if (!fd)
-    {
+    if (!fd) {
         ESP_LOGE(TAG, "Failed to create file : %s", filepath);
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to create file");
@@ -368,15 +339,12 @@ static esp_err_t upload_post_handler(httpd_req_t *req)
      * the size of the file being uploaded */
     int remaining = req->content_len;
 
-    while (remaining > 0)
-    {
+    while (remaining > 0) {
 
         ESP_LOGI(TAG, "Remaining size : %d", remaining);
         /* Receive the file part by part into a buffer */
-        if ((received = httpd_req_recv(req, buf, MIN(remaining, SCRATCH_BUFSIZE))) <= 0)
-        {
-            if (received == HTTPD_SOCK_ERR_TIMEOUT)
-            {
+        if ((received = httpd_req_recv(req, buf, MIN(remaining, SCRATCH_BUFSIZE))) <= 0) {
+            if (received == HTTPD_SOCK_ERR_TIMEOUT) {
                 /* Retry if timeout occurred */
                 continue;
             }
@@ -393,8 +361,7 @@ static esp_err_t upload_post_handler(httpd_req_t *req)
         }
 
         /* Write buffer content to file on storage */
-        if (received && (received != fwrite(buf, 1, received, fd)))
-        {
+        if (received && (received != fwrite(buf, 1, received, fd))) {
             /* Couldn't write everything to file!
              * Storage may be full? */
             fclose(fd);
@@ -431,24 +398,21 @@ static esp_err_t flash_post_handler(httpd_req_t *req)
     /* Skip leading "/flash" from URI to get filename */
     /* Note sizeof() counts NULL termination hence the -1 */
     const char *filename = get_path_from_uri(filepath, ((struct file_server_data *)req->user_ctx)->base_path,
-                                             req->uri + sizeof("/flash") - 1, sizeof(filepath));
-    if (!filename)
-    {
+                           req->uri + sizeof("/flash") - 1, sizeof(filepath));
+    if (!filename) {
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
         return ESP_FAIL;
     }
 
     /* Filename cannot have a trailing '/' */
-    if (filename[strlen(filename) - 1] == '/')
-    {
+    if (filename[strlen(filename) - 1] == '/') {
         ESP_LOGE(TAG, "Invalid filename : %s", filename);
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Invalid filename");
         return ESP_FAIL;
     }
 
-    if (stat(filepath, &file_stat) == -1)
-    {
+    if (stat(filepath, &file_stat) == -1) {
         ESP_LOGE(TAG, "File does not exist : %s", filename);
         /* Respond with 400 Bad Request */
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "File does not exist");
@@ -456,8 +420,7 @@ static esp_err_t flash_post_handler(httpd_req_t *req)
     }
 
     filename++;
-    if (flashSTM(filename) != ESP_OK)
-    {
+    if (flashSTM(filename) != ESP_OK) {
         ESP_LOGE(TAG, "Target flashing failed!");
     }
 
@@ -477,7 +440,7 @@ static esp_err_t delete_post_handler(httpd_req_t *req)
     /* Skip leading "/delete" from URI to get filename */
     /* Note sizeof() counts NULL termination hence the -1 */
     const char *filename = get_path_from_uri(filepath, ((struct file_server_data *)req->user_ctx)->base_path,
-                                             req->uri  + sizeof("/delete") - 1, sizeof(filepath));
+                           req->uri  + sizeof("/delete") - 1, sizeof(filepath));
     if (!filename) {
         /* Respond with 500 Internal Server Error */
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Filename too long");
@@ -515,22 +478,19 @@ esp_err_t start_file_server(const char *base_path)
     static struct file_server_data *server_data = NULL;
 
     /* Validate file storage base path */
-    if (!base_path || strcmp(base_path, "/spiffs") != 0)
-    {
+    if (!base_path || strcmp(base_path, "/spiffs") != 0) {
         ESP_LOGE(TAG, "File server presently supports only '/spiffs' as base path");
         return ESP_ERR_INVALID_ARG;
     }
 
-    if (server_data)
-    {
+    if (server_data) {
         ESP_LOGE(TAG, "File server already started");
         return ESP_ERR_INVALID_STATE;
     }
 
     /* Allocate memory for server data */
     server_data = calloc(1, sizeof(struct file_server_data));
-    if (!server_data)
-    {
+    if (!server_data) {
         ESP_LOGE(TAG, "Failed to allocate memory for server data");
         return ESP_ERR_NO_MEM;
     }
@@ -546,8 +506,7 @@ esp_err_t start_file_server(const char *base_path)
     config.uri_match_fn = httpd_uri_match_wildcard;
 
     ESP_LOGI(TAG, "Starting HTTP Server");
-    if (httpd_start(&server, &config) != ESP_OK)
-    {
+    if (httpd_start(&server, &config) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start file server!");
         return ESP_FAIL;
     }

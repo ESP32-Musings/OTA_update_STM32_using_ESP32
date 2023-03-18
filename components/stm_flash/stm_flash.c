@@ -21,15 +21,13 @@ esp_err_t writeTask(FILE *flash_file)
     fseek(flash_file, 0, SEEK_SET);
     setupSTM();
 
-    while ((bytes_read = fread(block, 1, 256, flash_file)) > 0)
-    {
+    while ((bytes_read = fread(block, 1, 256, flash_file)) > 0) {
         curr_block++;
         ESP_LOGI(TAG_STM_FLASH, "Writing block: %d", curr_block);
         ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
 
         esp_err_t ret = flashPage(loadAddress, block);
-        if (ret == ESP_FAIL)
-        {
+        if (ret == ESP_FAIL) {
             return ESP_FAIL;
         }
 
@@ -52,15 +50,13 @@ esp_err_t readTask(FILE *flash_file)
 
     fseek(flash_file, 0, SEEK_SET);
 
-    while ((bytes_read = fread(block, 1, 256, flash_file)) > 0)
-    {
+    while ((bytes_read = fread(block, 1, 256, flash_file)) > 0) {
         curr_block++;
         ESP_LOGI(TAG_STM_FLASH, "Reading block: %d", curr_block);
         ESP_LOG_BUFFER_HEXDUMP("Block:  ", block, sizeof(block), ESP_LOG_DEBUG);
 
         esp_err_t ret = readPage(readAddress, block);
-        if (ret == ESP_FAIL)
-        {
+        if (ret == ESP_FAIL) {
             return ESP_FAIL;
         }
 
@@ -83,11 +79,9 @@ esp_err_t flashSTM(const char *file_name)
 
     initGPIO();
     FILE *flash_file = fopen(file_path, "rb");
-    if (flash_file != NULL)
-    {
+    if (flash_file != NULL) {
         // This while loop executes only once and breaks if any of the functions do not return ESP_OK
-        do
-        {
+        do {
             ESP_LOGI(TAG_STM_FLASH, "Writing STM32 Memory");
             IS_ESP_OK(writeTask(flash_file));
 
