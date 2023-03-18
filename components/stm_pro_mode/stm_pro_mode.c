@@ -9,9 +9,6 @@
 #include "driver/gpio.h"
 
 #include "esp_err.h"
-#include "esp_vfs.h"
-#include "esp_spiffs.h"
-
 #include "esp_event.h"
 #include "esp_log.h"
 
@@ -51,36 +48,6 @@ void initFlashUART(void)
     uart_set_pin(UART_CONTROLLER, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     ESP_LOGI(TAG_STM_PRO, "Initialized Flash UART");
-}
-
-void initSPIFFS(void)
-{
-    ESP_LOGI(TAG_STM_PRO, "Initializing SPIFFS");
-
-    esp_vfs_spiffs_conf_t conf = {
-        .base_path = "/spiffs",
-        .partition_label = NULL,
-        .max_files = 5,
-        .format_if_mount_failed = true
-    };
-
-    esp_err_t ret = esp_vfs_spiffs_register(&conf);
-
-    if (ret != ESP_OK) {
-        if (ret == ESP_FAIL) {
-            ESP_LOGE(TAG_STM_PRO, "Failed to mount or format filesystem");
-        } else if (ret == ESP_ERR_NOT_FOUND) {
-            ESP_LOGE(TAG_STM_PRO, "Failed to find SPIFFS partition");
-        } else {
-            ESP_LOGE(TAG_STM_PRO, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
-        }
-        return;
-    }
-
-    size_t total, used;
-    if (esp_spiffs_info(NULL, &total, &used) == ESP_OK) {
-        ESP_LOGI(TAG_STM_PRO, "Partition size: total: %d, used: %d", total, used);
-    }
 }
 
 void initGPIO(void)
