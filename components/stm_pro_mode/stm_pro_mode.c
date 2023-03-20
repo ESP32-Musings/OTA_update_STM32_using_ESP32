@@ -18,6 +18,7 @@
 #define HIGH              (1)
 #define LOW               (0)
 #define ACK               (0x79)
+#define NACK              (0x1F)
 
 #define TXD_PIN           (CONFIG_ESP_STM_UART_TXD)
 #define RXD_PIN           (CONFIG_ESP_STM_UART_RXD)
@@ -65,9 +66,9 @@ void resetSTM(void)
     ESP_LOGI(TAG_STM_PRO, "Starting RESET Procedure");
 
     gpio_set_level(RESET_PIN, LOW);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(pdMS_TO_TICKS(100));
     gpio_set_level(RESET_PIN, HIGH);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    vTaskDelay(pdMS_TO_TICKS(500));
 
     ESP_LOGI(TAG_STM_PRO, "Finished RESET Procedure");
 }
@@ -193,12 +194,17 @@ int sendBytes(const char *bytes, int count, int resp)
 
     if (length > 0) {
         uint8_t data[length];
-        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, pdMS_TO_TICKS(1000));
 
-        if (rxBytes > 0 && data[0] == ACK) {
-            ESP_LOGI(TAG_STM_PRO, "Sync Success");
-            ESP_LOG_BUFFER_HEXDUMP("SYNC", data, rxBytes, ESP_LOG_DEBUG);
-            return 1;
+        if (rxBytes > 0) {
+            if (data[0] == ACK) {
+                ESP_LOGI(TAG_STM_PRO, "Sync Success");
+                ESP_LOG_BUFFER_HEXDUMP("SYNC", data, rxBytes, ESP_LOG_DEBUG);
+                return 1;
+            } else if (data[0] == NACK) {
+                ESP_LOGE(TAG_STM_PRO, "Sync Failure: Received NACK");
+                return 1;
+            }
         } else {
             ESP_LOGE(TAG_STM_PRO, "Sync Failure");
             return 0;
@@ -227,7 +233,7 @@ int waitForSerialData(int dataCount, int timeout)
         if (length >= dataCount) {
             return length;
         }
-        vTaskDelay(1 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(1));
         timer++;
     }
     return 0;
@@ -236,7 +242,6 @@ int waitForSerialData(int dataCount, int timeout)
 void incrementLoadAddress(char *loadAddr)
 {
     loadAddr[2] += 0x1;
-
     if (loadAddr[2] == 0) {
         loadAddr[1] += 0x1;
 
@@ -271,7 +276,7 @@ esp_err_t flashPage(const char *address, const char *data)
     int length = waitForSerialData(1, SERIAL_TIMEOUT_MS);
     if (length > 0) {
         uint8_t data[length];
-        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_CONTROLLER, data, length, pdMS_TO_TICKS(1000));
         if (rxBytes > 0 && data[0] == ACK) {
             ESP_LOGI(TAG_STM_PRO, "Flash Success");
             return ESP_OK;
@@ -298,7 +303,7 @@ esp_err_t readPage(const char *address, const char *data)
     int length = waitForSerialData(257, SERIAL_TIMEOUT_MS);
     if (length > 0) {
         uint8_t uart_data[length];
-        const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, pdMS_TO_TICKS(1000));
 
         if (rxBytes > 0 && uart_data[0] == 0x79) {
             ESP_LOGI(TAG_STM_PRO, "Success");

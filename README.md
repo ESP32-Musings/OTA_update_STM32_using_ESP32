@@ -15,7 +15,7 @@
   <p align="center">
     Program your STM32Fxx Over-the-Air using ESP32
     <br />
-****    <a href="https://github.com/laukik-hase/OTA_update_STM32_using_ESP32/"></a>
+    <a href="https://github.com/laukik-hase/OTA_update_STM32_using_ESP32/"></a>
     <br />
     <a href="https://github.com/laukik-hase/OTA_update_STM32_using_ESP32/">View Code</a>
     ·

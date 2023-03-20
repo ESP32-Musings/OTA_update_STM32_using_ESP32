@@ -55,6 +55,5 @@ void app_main(void)
 
     initTask();
     flashSTM("blink.bin");
-    endConn();
 }
 
