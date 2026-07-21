@@ -154,7 +154,7 @@ According to STM documentation, this project could be compatible with a wide ran
 - STM32L0 Series
 - STM32L1 Series
 - STM32L4 Series
-- STM32L5 Series
+- **STM32L5 Series (verified)**
 - STM32U5 Series
 - STM32WB Series
 - STM32WL Series
