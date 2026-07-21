@@ -333,7 +333,7 @@ esp_err_t readPage(const char *address, const char *data)
     if (length > 0)
     {
         uint8_t uart_data[length];
-        const int rxBytes = uart_read_bytes(UART_NUM_1, uart_data, length, 1000 / portTICK_RATE_MS);
+        const int rxBytes = uart_read_bytes(UART_CONTROLLER, uart_data, length, 1000 / portTICK_RATE_MS);
 
         if (rxBytes > 0 && uart_data[0] == 0x79)
         {
