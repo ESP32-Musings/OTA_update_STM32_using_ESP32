@@ -46,7 +46,9 @@
 #define LOW 0
 
 #define ACK 0x79
-#define SERIAL_TIMEOUT 5000
+// You may needs to increase this delay, on some chip with bigger flash memory it may takes some time to erase
+// over 8s in my case.
+#define SERIAL_TIMEOUT 15000
 
 #define FILE_PATH_MAX 128
 #define BASE_PATH "/spiffs/"
